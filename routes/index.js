@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  res.send("Everything is ok.");
+  res.send("LunchMate Backend Works.");
 });
 
 module.exports = router;
