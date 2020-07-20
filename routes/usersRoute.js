@@ -1,7 +1,9 @@
 var express = require("express");
 var router = express.Router();
-var { createUser } = require("../controllers/userController");
+var { getAllUser, updateUser } = require("../controllers/userController");
 
-router.route("/signup").post(createUser);
+router.route("/").get(getAllUser);
+
+router.route("/update").put(updateUser);
 
 module.exports = router;
