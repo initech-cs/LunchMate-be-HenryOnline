@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 const bcrypt = require("bcrypt");
 const round = 10;
 const jwt = require("jsonwebtoken");
-const { AppError } = require("../utils/appError");
 
 const schema = new mongoose.Schema(
   {
@@ -15,14 +13,8 @@ const schema = new mongoose.Schema(
     age: {
       type: Number,
       required: true,
-    },
-    username: {
-      type: String,
-      trim: true,
-      required: true,
-      lowercase: true,
-      minlength: 5,
-      maxlength: 12,
+      min: 18,
+      max: 99,
     },
     email: {
       type: String,
@@ -30,12 +22,19 @@ const schema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    tags: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Tag",
+        required: true,
+      },
+    ],
     password: {
       type: String,
       required: true,
       trim: true,
-      minlength: 7,
-      maxlength: 12,
+      minlength: 6,
+      maxlength: 1024,
     },
     tokens: [String],
   },
@@ -48,9 +47,34 @@ const schema = new mongoose.Schema(
 
 schema.methods.toJSON = function () {
   const obj = this.toObject();
-  delete obj.password;
-  delete obj.tokens;
+  //delete obj.password;
+  //delete obj.tokens;
   return obj;
+};
+
+schema.methods.generateToken = async function () {
+  const token = jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.SECRET,
+    { expiresIn: "1d" }
+  );
+  this.tokens.push(token);
+  await this.save();
+  return token;
+};
+
+schema.statics.loginWithEmail = async function (email, password) {
+  const user = await this.findOne({ email }).populate("tags");
+  if (!user) {
+    return null;
+  }
+  const match = await bcrypt.compare(password, user.password);
+  if (match) {
+    return user;
+  }
+  return null;
 };
 
 schema.pre("save", async function (next) {
