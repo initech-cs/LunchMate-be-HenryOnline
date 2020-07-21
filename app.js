@@ -5,6 +5,7 @@ var cors = require("cors");
 var indexRouter = require("./routes/indexRoute");
 var usersRouter = require("./routes/usersRoute");
 var authRouter = require("./routes/authRoute");
+var meetingRouter = require("./routes/meetingRoute");
 
 const mongoose = require("mongoose");
 const { errorController } = require("./controllers/errorController");
@@ -33,8 +34,9 @@ mongoose
   .then(() => console.log("connected to database"));
 
 app.use("/", indexRouter);
-app.use("/users", verifyToken, usersRouter);
 app.use("/auth", authRouter);
+app.use("/users", verifyToken, usersRouter);
+app.use("/meeting", verifyToken, meetingRouter);
 
 app.use(errorController);
 

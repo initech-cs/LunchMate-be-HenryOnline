@@ -6,5 +6,6 @@ exports.verifyToken = catchAsync(async (req, res, next) => {
   if (!token) return next(new AppError(401, "Access denied"));
   const verified = jwt.verify(token, process.env.SECRET);
   req.user = verified;
+  console.log(req.user);
   next();
 });

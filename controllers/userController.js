@@ -22,7 +22,11 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   console.log(req.user);
   const user = await User.findById(req.user._id);
   const fields = Object.keys(req.body);
-  fields.map((field) => {
+  fields.map(async (field) => {
+    if (field == "tags") {
+      const newTags = await Tag.convertToObject(req.body[field]);
+      return (user[field] = newTags);
+    }
     return (user[field] = req.body[field]);
   });
   user.save();
@@ -34,6 +38,14 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 
 exports.getAllUser = catchAsync(async (req, res, next) => {
   const user = await User.find();
+  res.status(200).json({
+    status: "success",
+    data: user,
+  });
+});
+
+exports.getProfile = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user._id).populate("tags");
   res.status(200).json({
     status: "success",
     data: user,
